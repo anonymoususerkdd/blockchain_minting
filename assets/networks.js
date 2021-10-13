@@ -1,7 +1,7 @@
 exports.unlockAddresses = {
-  1: '0x3d5409cce1d45233de1d4ebdee74b8e004abdd13',
-  4: '0xD8C88BE5e8EB88E38E6ff5cE186d764676012B0b',
-  137: '0x14bb3586Ce2946E71B95Fe00Fc73dd30ed830863',
+  137: '0x3BA7fd6Bc940fd60981ea0BC9ca8Af81e9B69aec',
+  80001: '0x3BA7fd6Bc940fd60981ea0BC9ca8Af81e9B69aec',
 }
-exports.chainIdName = { 1: 'Eth Mainnet', 4: 'Rinkeby', 137: 'Polygon' }
+exports.chainIdName = { 137: 'Polygon', 80001: 'Polygon Test Net'}
 
+exports.mintProfiniAddress = "0xdd5fB125f9Ef8934FA4b318512BE8F9BB1d151fC"

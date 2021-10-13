@@ -107,10 +107,11 @@ import html2canvas from 'html2canvas'
 import { NFTStorage, File } from 'nft.storage'
 import abis from '~/assets/abis'
 import connectProvider from '~/services/provider'
-import { unlockAddresses, chainIdName } from '~/assets/networks'
+import { unlockAddresses, chainIdName, mintProfiniAddress } from '~/assets/networks'
 
-const Crypto = require('crypto')
+// const Crypto = require('crypto')
 
+// TODO point to our IPFS cloud
 const apiKey =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweEE5MzRCNGZiNTREOGFCMDk5NzY4NzU5YjU5OWYwYWI5Mjc3NGYyOUMiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTYyOTA0NzcyMzk0MSwibmFtZSI6ImFzZGZzYWYifQ.sFlkePbfV7ayYupL6JJER2utyQLY5UrSelHxWPHv7FM'
 const client = new NFTStorage({ token: apiKey })
@@ -122,15 +123,15 @@ export default {
       loading: false,
       success: false,
       input: null,
-      upperTitle: '',
-      lowerTitle: '',
-      rarity: '',
-      age: '',
-      university: '',
-      rank: '',
-      chair: '',
-      hindex: '',
-      collectionName: '',
+      upperTitle: 'fds',
+      lowerTitle: 'fds',
+      rarity: 'Common',
+      age: '11',
+      university: 'TUM',
+      rank: '12',
+      chair: 'Info',
+      hindex: '11',
+      collectionName: 'profini',
       collectionDescription: '',
       quantity: 1,
       price: 0.01,
@@ -141,9 +142,10 @@ export default {
       signer: null,
       chainId: 0,
       connected: false,
+      description: "fds",
       university_items: ['TUM', 'LMU'],
       rarity_items: ['Common', 'Limited', 'Rare', 'Super rare', 'Unique'],
-      rarityMapping: {"Common": 1, "Limited": 1000, 'Rare': 100, 'Super rare':10, 'Unique': 1},
+      rarityMapping: {'Common': 10000, 'Limited': 1000, 'Rare': 100, 'Super rare': 10, 'Unique': 1},
       tasks: [
         {
           id: 1,
@@ -204,82 +206,46 @@ export default {
 
       canvas.toBlob(async (blob) => {
         try {
-          // Upload image ============
-          const cidImage = await client.storeBlob(blob)
-          console.log(`image cid ${cidImage}`)
-          // =========================
-
           this.currentTask++
 
-          // Upload metadata ==============
 
-          const fileList = []
-
-          // this.rarityMapping[this.rarity] -> quantity
-          for (let i = 1; i <= this.rarityMapping[this.rarity]; i++) {
-            const metadataFile = new File(
-              [
-                JSON.stringify({
-                  name: `${this.collectionName} #${i}`,
-                  description: this.description,
-                  image: `ipfs://${cidImage}`,
-                }),
-              ],
-              String(i) // file name
-            )
-            fileList.push(metadataFile)
-          }
-          console.log(`file list ${fileList}`)
-          // TODO point to our IPFC cloud
-          // mint card for all varieties
-          // quanitity depending on class of rarity
-          const cidBaseURI = await client.storeDirectory(fileList)
-
-          console.log(`base URI ${cidBaseURI}`)
-          // =========================
-
-          this.currentTask++
-
-          // create lock ================
-          const unlockContract = new ethers.Contract(
+          const profiniContract = new ethers.Contract(
             unlockAddresses[this.chainId],
-            abis.Unlock.abi,
+            abis.Profini.abi,
             this.provider
           )
-          const unlockWithSigner = unlockContract.connect(this.signer)
-          const txCreateLock = await unlockWithSigner.createLock(
-            31536000, // expiration duration in seconds - now it's a year
-            '0x0000000000000000000000000000000000000000', // ERC20 token address - 0 for Ether
-            ethers.utils.parseEther(String(this.price)), // price
-            this.rarityMapping[this.rarity], // number of keys
-            this.collectionName, // name
-            '0x' + Crypto.randomBytes(12).toString('hex') // user specific salt
-          )
-          const res = await txCreateLock.wait()
-          const newLockAddress = res.events[0].args.newLockAddress
-          this.newLockAddress = newLockAddress
-          console.log(`new lock address ${newLockAddress}`)
-          // ============================
 
+          const signer = profiniContract.connect(this.signer)
+
+          const metadata = await client.store({
+            name: `${this.collectionName}`,
+            description: this.description,
+            image: new File(
+              [blob],
+              "image",
+             { type: 'image/jpg' }
+             ),
+          })
+
+          console.log(`base URI ${metadata}`)
           this.currentTask++
 
-          // set base uri of lock ================
-          const lockContract = new ethers.Contract(
-            newLockAddress,
-            abis.PublicLock.abi,
-            this.provider
+          const transaction = await signer.mint(
+            mintProfiniAddress,
+            this.rarityMapping[this.rarity],
+            metadata.url,
+            []
           )
-          const lockWithSigner = lockContract.connect(this.signer)
 
-          const txChangeURI = await lockWithSigner.setBaseTokenURI(
-            `ipfs://${cidBaseURI}/`
-          )
-          console.log(txChangeURI)
-          await txChangeURI.wait()
+          const response = await transaction.wait()
+          console.log(`Submit transaction ${response}`)
+          this.currentTask++
+
           // ===========================
           this.loading = false
           this.success = true
         } catch (error) {
+          console.log(error)
           this.errorHandler(error)
         }
       })
