@@ -53,6 +53,11 @@ export default {
           title: 'Create',
           to: '/create',
         },
+        {
+          icon: 'mdi-apps',
+          title: 'Upload card',
+          to: '/upload_image',
+        },
       ],
     }
   },
