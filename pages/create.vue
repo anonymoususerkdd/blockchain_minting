@@ -3,6 +3,7 @@
     <v-col cols="12" md="6">
       <v-card>
         <v-card-title> Information </v-card-title>
+        <v-select  v-model="rarity" :items="rarity_items" label="Rarity"></v-select>
         <v-select v-model="university" :items="university_items" label="University"></v-select>
         <v-card-text>
           <v-file-input
@@ -10,13 +11,12 @@
             accept="image/*"
             label="Image input"
           ></v-file-input>
-          <v-text-field v-model="upperTitle" label="Name"></v-text-field>
-          <v-text-field v-model="lowerTitle" label="Surname"></v-text-field>
-          <v-select  v-model="rarity" :items="rarity_items" label="Rarity"></v-select>
-          <v-text-field v-model="age" label="Age"></v-text-field>
+          <v-text-field v-model="name" label="Name"></v-text-field>
+          <v-text-field v-model="surname" label="Surname"></v-text-field>
           <v-text-field v-model="rank" label="Rank"></v-text-field>
           <v-text-field v-model="chair" label="Chair"></v-text-field>
-          <v-text-field v-model="hindex" label="H-index"></v-text-field>
+          <v-text-field v-model="book" label="Favourite book"></v-text-field>
+          <v-text-field v-model="hobby" label="Favourite hobby"></v-text-field>
           <v-divider class="my-6"></v-divider>
         </v-card-text>
         <v-card-actions>
@@ -30,15 +30,15 @@
       </v-card>
     </v-col>
     <v-col cols="12" md="6">
-      <div id="capture" class="metacard-preview-container" :style="`background-image: url('/${university}.png');`">
+      <div id="capture" class="metacard-preview-container" :style="`background-image: url('/${rarity}.png');`">
         <img class="preview-image" :src="image" />
-        <div class="name">{{ upperTitle }}</div>
-        <div class="surname">{{ lowerTitle }}</div>
-        <div class="age">{{ age }}</div>
-        <div class="university">{{ university }}</div>
+        <img class="university-image" :src="`${university}.png`" />
+        <div class="name">{{ name }}</div>
+        <div class="surname">{{ surname }}</div>
         <div class="rank">{{ rank }}</div>
         <div class="chair">{{ chair }}</div>
-        <div class="hindex">{{ hindex }}</div>
+        <div class="book">{{ book }}</div>
+        <div class="hobby">{{ hobby }}</div>
       </div>
     </v-col>
     <v-dialog v-model="loading" persistent width="500px">
@@ -123,14 +123,15 @@ export default {
       loading: false,
       success: false,
       input: null,
-      upperTitle: 'fds',
-      lowerTitle: 'fds',
-      rarity: 'Common',
-      age: '11',
+      name: 'name',
+      surname: 'surname',
+      rarity: 'Basic',
       university: 'TUM',
       rank: '12',
-      chair: 'Info',
+      chair: 'chair',
       hindex: '11',
+      book: 'book book book',
+      hobby: 'hobbyhobby hobbyhobby hobby ',
       collectionName: 'profini',
       collectionDescription: '',
       quantity: 1,
@@ -144,8 +145,8 @@ export default {
       connected: false,
       description: "fds",
       university_items: ['TUM', 'LMU'],
-      rarity_items: ['Common', 'Limited', 'Rare', 'Super rare', 'Unique'],
-      rarityMapping: {'Common': 10000, 'Limited': 1000, 'Rare': 100, 'Super rare': 10, 'Unique': 1},
+      rarity_items: ['Basic', 'Rare', 'Unique'],
+      rarityMapping: {'Basic': 10000, 'Rare': 100, 'Unique': 1},
       tasks: [
         {
           id: 1,
@@ -262,24 +263,32 @@ export default {
   background-size: cover;
   background-color: white;
   border-radius: 1rem;
-  width: 308px;
-  height: 500px;
+  width: 338px;
+  height: 570px;
 }
 
 .preview-image {
   position: absolute;
   z-index: 2;
-  /*left: 135px;*/
   top: 60px;
   border-radius: 10px;
-  width: 308px;
-  height: 300px;
+  width: 338px;
+  height: 320px;
+}
+
+.university-image {
+  position: absolute;
+  z-index: 2;
+  top: 15px;
+  left: 255px;
+  width: 60px;
+  height: 30px;
 }
 
 .name {
   position: relative;
-  left: 65px;
-  top: 280px;
+  left: 80px;
+  top: 320px;
   font-weight: bold;
   text-align: center;
   z-index: 6;
@@ -291,8 +300,8 @@ export default {
 }
 .surname {
   position: relative;
-  left: 65px;
-  top: 300px;
+  left: 80px;
+  top: 340px;
   z-index: 6;
   text-align: center;
   color: white;
@@ -311,17 +320,6 @@ export default {
   width: 170px;
   height: 23px;
 }
-.age {
-  position: relative;
-  left: 35px;
-  top: 340px;
-  z-index: 6;
-  text-align: center;
-  color: white;
-  font-size: 1.4em;
-  width: 10px;
-  height: 3px;
-}
 .university {
   position: relative;
   left: 125px;
@@ -335,35 +333,46 @@ export default {
 }
 .rank {
   position: relative;
-  left: 240px;
-  top: 340px;
+  left: 32px;
+  top: 415px;
   z-index: 6;
   text-align: center;
   color: white;
-  font-size: 1.4em;
+  font-size: 1.3em;
   width: 10px;
   height: 3px;
 }
 .chair {
   position: relative;
-  left: 35px;
-  top: 400px;
+  left: 20px;
+  top: 475px;
   z-index: 6;
   text-align: center;
   color: white;
-  font-size: 1.4em;
+  font-size: 1.3em;
   width: 10px;
   height: 3px;
 }
-.hindex {
+.book {
   position: relative;
-  left: 220px;
-  top: 400px;
+  left: 150px;
+  top: 415px;
   z-index: 6;
-  text-align: center;
+  /*text-align: center;*/
   color: white;
-  font-size: 1.4em;
-  width: 10px;
+  font-size: 1em;
+  width: 190px;
+  height: 3px;
+}
+.hobby {
+  position: relative;
+  left: 150px;
+  top: 470px;
+  z-index: 6;
+  /*text-align: center;*/
+  color: white;
+  font-size: 1em;
+  width: 190px;
   height: 3px;
 }
 </style>
